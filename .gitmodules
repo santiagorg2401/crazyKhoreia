@@ -1,0 +1,3 @@
+[submodule "src/image2gcode"]
+	path = src/image2gcode
+	url = https://github.com/santiagorg2401/image2gcode.git
