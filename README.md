@@ -35,7 +35,7 @@ To install crazyKhoreia you'll need Python 3 and pip:
 pip3 install -i https://test.pypi.org/simple/ crazyKhoreia==0.0.1
 ```
 ### Installing from source.
-If you'd like to develop, edit or have full access into the crazyKhoreia system them you may installing from source.
+If you'd like to develop, edit or have full access into the crazyKhoreia system them you may install it from source.
 ```console
 git clone https://github.com/santiagorg2401/crazyKhoreia.git
 ```

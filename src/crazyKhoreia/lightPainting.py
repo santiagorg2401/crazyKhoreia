@@ -14,6 +14,7 @@ from crazyKhoreia.crazyKhoreia import crazyKhoreia
 sys.modules['sklearn.externals.six'] = six
 import mlrose
 
+
 class lightPainting():
     def __init__(self, MAX_WIDTH, MAX_HEIGHT, MIN_WIDTH, MIN_HEIGHT, in_path, out_path, detail=0.05, speed=1.0, sleepTime=0.1, video=False, led=False):
 
@@ -26,14 +27,16 @@ class lightPainting():
         dist_list, ax = self.get_distances(
             self.ck.cnt_scaled, self.ck.width, self.ck.height)
 
-        # best_state = self.find_order(ck.cnt_scaled, dist_list)
+        best_state = self.find_order(self.ck.cnt_scaled, dist_list)
         self.wayPoints = self.ck.get_waypoints(
-            self.ck.cnt_scaled, self.ck.width, self.ck.height, ax,  best_state=None)
+            self.ck.cnt_scaled, self.ck.width, self.ck.height, ax,  best_state)
         self.wayPoints = self.ck.clean_waypoints(self.wayPoints, self.detail)
         self.wayPoints = self.ck.trans_waypoints(self.wayPoints)
         self.distance, self.Time = self.calculate_stats()
         self.msg = self.save(self.wayPoints, self.distance,
                              self.Time, self.in_path, self.out_path, self.video)
+
+        plt.show()
 
     def get_distances(self, cnt_scaled, width, height):
         strPoints = np.empty((0, 2))
@@ -66,7 +69,7 @@ class lightPainting():
         cc = (cycler(color=['purple', 'orange', 'lime', 'royalblue', 'steelblue', 'cyan', 'gold']) +
               cycler(marker=['^', 'o', 's', 'p', '*', 'x', 'D']))
 
-        ax = plt.subplot()
+        fig, ax = plt.subplots()
         ax.set_prop_cycle(cc)
 
         ax.plot(strPoints[:, 0], strPoints[:, 1], 'o', c='b',
@@ -98,10 +101,10 @@ class lightPainting():
 
         #best_state, best_fitness = mlrose.random_hill_climb(problem_fit, max_attempts=100, random_state=2)
 
-        ax = plt.subplot()
+        fig, ax = plt.subplots()
         ax.plot(fitness_curve, label='Fitness curve.')
         ax.legend()
-        plt.show()
+        ax.set_title('Fitness curve.')
 
         return best_state
 
@@ -134,8 +137,15 @@ class lightPainting():
         Y = wayPoints[:, 1]
         Z = wayPoints[:, 2]
 
+        # Plot points.
+        fig2, ax1 = plt.subplots()
+        ax1.plot(wayPoints[:, 1], wayPoints[:, 2], 'o', c='blueviolet', label="waypoints.")
+        ax1.plot(Y, Z, color='#570861')
+        ax1.set_title("UAV path.")
+
         fig, ax = plt.subplots()
         line, = ax.plot(Y, Z, color='#570861')
+        ax.set_title("UAV path animation.")
 
         if video == True:
             ani = animation.FuncAnimation(fig, self.update, len(Y), fargs=[Y, Z, line],
@@ -163,7 +173,4 @@ class lightPainting():
 
         print(msg)
 
-        # Plot points.
-        plt.plot(wayPoints[:, 1], wayPoints[:, 2], 'o')
-        plt.show()
         return msg

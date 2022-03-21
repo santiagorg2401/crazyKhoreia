@@ -22,7 +22,8 @@ class crazyKhoreia():
         ax1.set_axis_off()
         ax1.set_title("Edges image.")
 
-        scale_fact_x, scale_fact_y = getImageScaleFact(img, self.MAX_WIDTH, self.MAX_HEIGHT)  # scale factor for input image
+        scale_fact_x, scale_fact_y = getImageScaleFact(
+            img, self.MAX_WIDTH, self.MAX_HEIGHT)  # scale factor for input image
 
         edges = edgeDetect(img)  # peform canny edge detection on the image
 
@@ -37,7 +38,6 @@ class crazyKhoreia():
             width, height, scale_fact_x, scale_fact_y)
 
         ax1.imshow(edges, cmap="gray")
-        plt.show()
 
         return cnt_scaled, width, height
 
@@ -48,7 +48,7 @@ class crazyKhoreia():
         else:
             wayPoints = np.empty((0, 3))
 
-        if best_state == None:
+        if best_state.all() == None:
             best_state = range(0, len(cnt_scaled))
 
         for i in best_state:                             # Iterate contours.
@@ -72,7 +72,6 @@ class crazyKhoreia():
                 label='wayPoints', alpha=0.8, ls=':', marker=',')
         ax.legend()
         ax.set_title("Contour inspection.")
-        plt.show()
 
         return wayPoints
 
