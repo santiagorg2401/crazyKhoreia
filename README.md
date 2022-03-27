@@ -1,9 +1,8 @@
 # crazyKhoreia
 ## Brief description.
-crazyKhoreia is a robotic perception system intended for UAVs (aka drones), which takes a digital image and converts it into a waypoint matrix using X, Y and Z coordinates in meters for UAVs choreography design, its implementation was based on the work of the senior design group (2019-2020), Connected RoboSketch at the University of Alabama in [image2gcode](https://github.com/connectedrobosketch/image2gcode), however, their implementation was intended for a CNC machine.
-
+crazyKhoreia is a robotic perception system intended for UAVs (aka drones), which takes a digital image and converts it into a waypoint matrix using X, Y and Z coordinates in meters for UAVs choreography design.
 ## How does it work?
-crazyKhoreia takes a digital image and uses the [image2gcode](https://github.com/connectedrobosketch/image2gcode) vectorizing technic based on openCV [findContours](https://docs.opencv.org/3.4/d3/dc0/group__imgproc__shape.html#ga17ed9f5d79ae97bd4c7cf18403e1689a) algorithm to obtain contours, then, it gets waypoints from those contours, after that, depending on the usage mode (either lightPainting or multi-UAV formation), it optimizes the waypoints and finds a feasible 2D path travelling through **all** of them, minimizing the total travelled distance, thus, the flight duration (assuming constant speed).
+crazyKhoreia takes a digital image and uses a vectorizing technic based on openCV [findContours](https://docs.opencv.org/3.4/d3/dc0/group__imgproc__shape.html#ga17ed9f5d79ae97bd4c7cf18403e1689a) algorithm to obtain contours, then, it gets waypoints from those contours, after that, depending on the usage mode (either lightPainting or multi-UAV formation), it optimizes the waypoints and finds a feasible 2D path travelling through **all** of them, minimizing the total travelled distance, thus, the flight duration (assuming constant speed).
 
 
 ### Light painting mode (class lightPainting)
@@ -23,10 +22,7 @@ $ pip3 install numpy
 $ pip3 install six
 $ pip3 install mlrose
 ```
-Also, you'll need to clone the [image2gcode forked repo.](https://github.com/santiagorg2401/image2gcode)
-```console
-git clone https://github.com/santiagorg2401/image2gcode.git
-```
+
 ### Installing from Pypi with Python 3.
 To install crazyKhoreia you'll need Python 3 and pip:
 ```console
@@ -56,18 +52,13 @@ crazyKhoreia's usage it's pretty straightforward, you'll only need a digital ima
 
 Take into account that lightPainting class creates an instance of the crazyKhoreia class in its constructor method.
 
-To run the program, execute your code from your workspace's **root folder** and create an instance of the lightPainting class.
+To run the program, create an instance of the lightPainting class.
 ```console
 lp = lightPainting(MAX_WIDTH, MAX_HEIGHT, MIN_WIDTH, MIN_HEIGHT, in_path, out_path, detail=0.05, speed=1.0, sleepTime=0.1, video=False, led=False)
 ```
 
 After its execution you'll notice the output files within the set output path.
 
-**Side note:** the root folder is anywhere where you can run :
-```console
-$ ls
-```
-And get ```image2gcode``` as one of the possible results.
 ## Trouble?
 Start a new [discussion](https://github.com/santiagorg2401/crazyKhoreia/discussions) if you have any question related to the project, but, if you have a technical issue or a bug to report, then please create an [issue](https://github.com/santiagorg2401/crazyKhoreia/issues).
 
