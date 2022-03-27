@@ -26,7 +26,7 @@ $ pip3 install mlrose
 ### Installing from Pypi with Python 3.
 To install crazyKhoreia you'll need Python 3 and pip:
 ```console
-pip3 install -i https://test.pypi.org/simple/ crazyKhoreia==0.0.1
+pip3 install crazyKhoreia
 ```
 ### Installing from source.
 If you'd like to develop, edit or have full access into the crazyKhoreia system them you may install it from source.
