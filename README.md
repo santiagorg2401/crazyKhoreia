@@ -22,7 +22,6 @@ $ pip3 install opencv-python
 $ pip3 install numpy
 $ pip3 install six
 $ pip3 install mlrose
-$ pip3 install -i https://test.pypi.org/simple/ crazyKhoreia==0.0.1
 ```
 Also, you'll need to clone the [image2gcode forked repo.](https://github.com/santiagorg2401/image2gcode)
 ```console
