@@ -14,7 +14,6 @@ from crazyKhoreia.crazyKhoreia import crazyKhoreia
 sys.modules['sklearn.externals.six'] = six
 import mlrose
 
-
 class lightPainting():
     def __init__(self, MAX_WIDTH, MAX_HEIGHT, MIN_WIDTH, MIN_HEIGHT, in_path, out_path, detail=0.05, speed=1.0, sleepTime=0.1, video=False, led=False):
 
@@ -24,34 +23,35 @@ class lightPainting():
         self.ck = crazyKhoreia(self.MAX_WIDTH, self.MAX_HEIGHT,
                                self.MIN_WIDTH, self.MIN_HEIGHT, self.in_path, self.led)
 
-        dist_list, ax = self.get_distances(
-            self.ck.cnt_scaled, self.ck.width, self.ck.height)
+        # if (len(self.ck.cnt_scaled) > 1):
+        #     dist_list = self.get_distances(
+        #         self.ck.cnt_scaled, self.ck.ImgShape_X, self.ck.ImgShape_Y)
 
-        best_state = self.find_order(self.ck.cnt_scaled, dist_list)
-        self.wayPoints = self.ck.get_waypoints(
-            self.ck.cnt_scaled, self.ck.width, self.ck.height, ax,  best_state)
+        #best_state = self.find_order(self.ck.cnt_scaled, dist_list)
+
+        self.wayPoints = self.ck.get_waypoints(best_state=None)
         self.wayPoints = self.ck.clean_waypoints(self.wayPoints, self.detail)
-        self.wayPoints = self.ck.trans_waypoints(self.wayPoints)
+
         self.distance, self.Time = self.calculate_stats()
         self.msg = self.save(self.wayPoints, self.distance,
                              self.Time, self.in_path, self.out_path, self.video)
 
+        self.ck.plot_contour_inspection(self.wayPoints)
+
         plt.show()
 
-    def get_distances(self, cnt_scaled, width, height):
+    def get_distances(self, cnt_scaled, ImgShape_X, ImgShape_Y):
         strPoints = np.empty((0, 2))
         endPoints = np.empty((0, 2))
         distances = np.array([])
 
         # Iterate contours.
-        for i in range(0, len(cnt_scaled)):
-            x = (cnt_scaled[i][0][0][0] - (width/2))
-            y = (cnt_scaled[i][0][0][1] - (height/2))
-            strPoints = np.vstack([strPoints, [x, y]])
+        for i in range(0, len(self.cnt_scaled)):
+            x = np.array(self.cnt_scaled[i])
+            x = np.reshape(x, (len(self.cnt_scaled[i]), 2))
 
-            x = (cnt_scaled[i][-1][0][0] - (width/2))
-            y = (cnt_scaled[i][-1][0][1] - (height/2))
-            endPoints = np.vstack([endPoints, [x, y]])
+            strPoints = np.vstack([strPoints, [x[0, 0], x[0, 1]]])
+            endPoints = np.vstack([endPoints, [x[-1, 0], x[-1, 1]]])
 
         combs = np.array(
             list(itertools.combinations(range(0, len(cnt_scaled)), 2)))
@@ -65,27 +65,7 @@ class lightPainting():
 
         dist_list = np.array([combs[:, 0], combs[:, 1], distances]).T
 
-        # See https://matplotlib.org/3.5.1/gallery/color/named_colors.html#sphx-glr-gallery-color-named-colors-py for more colors.
-        cc = (cycler(color=['purple', 'orange', 'lime', 'royalblue', 'steelblue', 'cyan', 'gold']) +
-              cycler(marker=['^', 'o', 's', 'p', '*', 'x', 'D']))
-
-        fig, ax = plt.subplots()
-        ax.set_prop_cycle(cc)
-
-        ax.plot(strPoints[:, 0], strPoints[:, 1], 'o', c='b',
-                label="Start points.", alpha=0.30, ms=12)
-        ax.plot(endPoints[:, 0], endPoints[:, 1], 's', c='r',
-                label="End points.", alpha=0.30, ms=12)
-
-        for i in range(0, len(strPoints)):
-            ax.arrow(strPoints[:, 0][i], strPoints[:, 1][i], endPoints[:, 0][i] -
-                     strPoints[:, 0][i], endPoints[:, 1][i] - strPoints[:, 1][i], ls='--', color='g')
-            ax.text(strPoints[:, 0][i], strPoints[:, 1]
-                    [i], str(i), ha='left', c='b')
-            ax.text(endPoints[:, 0][i], endPoints[:, 1]
-                    [i], str(i), ha='right', c='r')
-
-        return dist_list, ax
+        return dist_list
 
     def find_order(self, cnt_scaled, dist_list):
         # Initialize fitness function object using dist_list
@@ -139,7 +119,8 @@ class lightPainting():
 
         # Plot points.
         fig2, ax1 = plt.subplots()
-        ax1.plot(wayPoints[:, 1], wayPoints[:, 2], 'o', c='blueviolet', label="waypoints.")
+        ax1.plot(wayPoints[:, 1], wayPoints[:, 2], 'o',
+                 c='blueviolet', label="waypoints.")
         ax1.plot(Y, Z, color='#570861')
         ax1.set_title("UAV path.")
 
@@ -164,7 +145,7 @@ class lightPainting():
 
         msg = "Choreography ready!, please read the following information:" + \
               "\nInitial position: " + str(initialPos) + \
-              "\nTake off height: " + str(takeOffHeight) + \
+              "\nTake off heigth: " + str(takeOffHeight) + \
               "\nMinimum coordinates: " + str(minCoords) + \
               "\nMaximum coordinates: " + str(maxCoords) + \
               "\nNumber of waypoints: " + str(len(wayPoints)) + \
