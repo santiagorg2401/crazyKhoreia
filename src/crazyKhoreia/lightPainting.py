@@ -8,7 +8,6 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-from cycler import cycler
 from crazyKhoreia.crazyKhoreia import crazyKhoreia
 
 sys.modules['sklearn.externals.six'] = six
