@@ -22,14 +22,8 @@ class lightPainting():
         self.ck = crazyKhoreia(self.MAX_WIDTH, self.MAX_HEIGHT,
                                self.MIN_WIDTH, self.MIN_HEIGHT, self.in_path, self.led)
 
-        # if (len(self.ck.cnt_scaled) > 1):
-        #     dist_list = self.get_distances(
-        #         self.ck.cnt_scaled, self.ck.ImgShape_X, self.ck.ImgShape_Y)
-
-        #best_state = self.find_order(self.ck.cnt_scaled, dist_list)
-
-        self.wayPoints = self.ck.get_waypoints(best_state=None)
-        self.wayPoints = self.ck.clean_waypoints(self.wayPoints, self.detail)
+        self.wayPoints = self.ck.get_waypoints()
+        self.wayPoints = self.clean_waypoints(self.wayPoints, self.detail)
 
         self.distance, self.Time = self.calculate_stats()
         self.msg = self.save(self.wayPoints, self.distance,
@@ -86,6 +80,19 @@ class lightPainting():
         ax.set_title('Fitness curve.')
 
         return best_state
+
+    def clean_waypoints(self, wayPoints, detail):
+        # Clean wayPoints by a detail parameter.
+        initialPoints = len(wayPoints)
+
+        for j in range(0, 10):
+          for i in range(1, initialPoints):
+              if ((i + 1 == len(wayPoints)) | (i == len(wayPoints))):
+                  break
+              elif (np.linalg.norm(wayPoints[:, 0:3][i - 1] - wayPoints[:, 0:3][i]) < detail):
+                  wayPoints = np.delete(wayPoints, i - 1, 0)
+
+        return wayPoints
 
     def update(self, num, x, y, line):
         line.set_data(x[:num], y[:num])

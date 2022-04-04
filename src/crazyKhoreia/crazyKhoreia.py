@@ -24,9 +24,11 @@ class crazyKhoreia():
         # If the image type is png, it'll have a fourth channel known as alpha, which is transparency,
         # in that case, the background will be filled in white.
         if self.img.shape[2] == 4:
-          bg = np.array([255, 255, 255])
-          alpha = (self.img[:, :, 3] / 255).reshape(self.img.shape[:2] + (1,))
-          self.img = ((bg * (1 - alpha)) + (self.img[:, :, :3] * alpha)).astype(np.uint8)
+            bg = np.array([255, 255, 255])
+            alpha = (self.img[:, :, 3] /
+                     255).reshape(self.img.shape[:2] + (1,))
+            self.img = ((bg * (1 - alpha)) +
+                        (self.img[:, :, :3] * alpha)).astype(np.uint8)
 
         # Flip image.
         img_flipped = cv.flip(self.img, 0)
@@ -42,7 +44,7 @@ class crazyKhoreia():
 
         # Find countours.
         contours, hierarchy = cv.findContours(
-            image=img_bw, mode=cv.RETR_TREE, method=cv.CHAIN_APPROX_SIMPLE)
+            image=img_bw, mode=cv.RETR_TREE, method=cv.CHAIN_APPROX_NONE)
 
         # Create subplots for original image and image with contours visualization.
         fig, (ax0, ax1, ax2) = plt.subplots(nrows=1, ncols=3)
@@ -63,21 +65,6 @@ class crazyKhoreia():
 
         ax2.imshow(cv.flip(img_with_contour[..., ::-1], 0))
 
-        # See https://stackoverflow.com/questions/69369615/opencv-remove-doubled-contours-on-outlines-of-shapes-without-using-retr-externa
-        # for cnt, hrc in zip(contours, hierarchy[0]):
-        #     area = cv.contourArea(cnt)
-        #     if area > 400: 
-        #         approx = cv.approxPolyDP(cnt, 0.009 * cv.arcLength(cnt, True), True)
-        #         if hrc[2] < 0:
-        #             exte = approx.squeeze()
-        #         elif hrc[3] < 0:
-        #             inte = approx.squeeze()
-
-        # exte = exte[np.lexsort(exte.T)]
-        # inte = inte[np.lexsort(inte.T)]
-        # box = cv.convexHull((exte[exte[:, 0].argsort()] + inte[inte[:, 0].argsort()]) // 2)
-        # contours = box
-
         return contours
 
     def process_contours(self, contours):
@@ -87,7 +74,7 @@ class crazyKhoreia():
         # Get image's scale factor from its dimensions and user's parameters.
         scale_fact_x = ImgShape_X/(self.MAX_WIDTH - self.MIN_WIDTH)
         scale_fact_y = ImgShape_Y/(self.MAX_HEIGHT - self.MIN_HEIGHT)
-        
+
         # Scale contours if needed to satisfy maximum dimensions requirements.
         cnt_scaled = []
 
@@ -168,16 +155,15 @@ class crazyKhoreia():
         ax.legend()
         ax.set_title("Contour inspection.")
 
-    def get_waypoints(self, best_state=None):
+    def get_waypoints(self):
         # Convert vectors (contours) to cartesian points in XYZ [meters] format.
         if self.led == True:
             wayPoints = np.empty((0, 4))
         else:
             wayPoints = np.empty((0, 3))
 
-        best_state = range(0, len(self.cnt_scaled))
-
-        for i in best_state:                             # Iterate contours.
+        # Iterate contours.
+        for i in range(0, len(self.cnt_scaled)):
             x = np.array(self.cnt_scaled[i])
             x = np.reshape(x, (len(self.cnt_scaled[i]), 2))
 
@@ -191,17 +177,5 @@ class crazyKhoreia():
                     [1.5*np.ones(shape=(len(x),)), x[:, 0], x[:, 1]]).T
 
             wayPoints = np.vstack([wayPoints, stck])
-
-        return wayPoints
-
-    def clean_waypoints(self, wayPoints, detail):
-        # Clean wayPoints by a detail parameter.
-        initialPoints = len(wayPoints)
-
-        for i in range(1, initialPoints):
-            if ((i + 1 == len(wayPoints)) | (i == len(wayPoints))):
-                break
-            elif (np.linalg.norm(wayPoints[:, 0:3][i - 1] - wayPoints[:, 0:3][i]) < detail):
-                wayPoints = np.delete(wayPoints, i - 1, 0)
 
         return wayPoints
