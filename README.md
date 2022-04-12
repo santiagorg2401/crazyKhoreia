@@ -2,7 +2,7 @@
 ## Brief description.
 crazyKhoreia is a robotic perception system intended for UAVs (aka drones), which takes a digital image and converts it into a waypoint matrix using X, Y and Z coordinates in meters for UAVs choreography design.
 ## How does it work?
-crazyKhoreia takes a digital image and uses a vectorizing technic based on openCV [findContours](https://docs.opencv.org/3.4/d3/dc0/group__imgproc__shape.html#ga17ed9f5d79ae97bd4c7cf18403e1689a) algorithm to obtain contours, then, it gets waypoints from those contours, after that, depending on the usage mode (either lightPainting or multi-UAV formation), it optimizes the waypoints and finds a feasible 2D path travelling through **all** of them, minimizing the total travelled distance, thus, the flight duration (assuming constant speed).
+crazyKhoreia takes a digital image and uses a vectorizing technic based on openCV [findContours](https://docs.opencv.org/3.4/d3/dc0/group__imgproc__shape.html#ga17ed9f5d79ae97bd4c7cf18403e1689a) algorithm to obtain contours, then, it gets waypoints from those contours, after that, depending on the usage mode (either lightPainting or multi-UAV formation), it optimizes the waypoints and finds a feasible 2D path for travelling through **all** of them, or it computes safe trajectories for multi-UAV formation.
 
 
 ### Light painting mode (class lightPainting)
@@ -19,8 +19,7 @@ Before using crazyKhoreia, please install the following dependencies.
 ```console
 $ pip3 install opencv-python
 $ pip3 install numpy
-$ pip3 install six
-$ pip3 install mlrose
+$ pip3 install matplotlib
 ```
 
 ### Installing from Pypi with Python 3.
@@ -46,7 +45,7 @@ crazyKhoreia's usage it's pretty straightforward, you'll only need a digital ima
 | led | all | [lightPainting](https://github.com/santiagorg2401/crazyKhoreia/blob/e36bff07f4cf89e3d0205c949ff4bd80f890110e/src/crazyKhoreia/lightPainting.py#L17) | Set led to ```True``` if you want to add led control within the waypoints output file, else, set ```False```. | bool
 | detail | light painting | [lightPainting](https://github.com/santiagorg2401/crazyKhoreia/blob/e36bff07f4cf89e3d0205c949ff4bd80f890110e/src/crazyKhoreia/lightPainting.py#L17) | Used in [clean_waypoints](https://github.com/santiagorg2401/crazyKhoreia/blob/e36bff07f4cf89e3d0205c949ff4bd80f890110e/src/crazyKhoreia/crazyKhoreia.py#L79) method to delete the points that their euclidian distance is minor than **detail**. | float
 | speed | light painting | [lightPainting](https://github.com/santiagorg2401/crazyKhoreia/blob/e36bff07f4cf89e3d0205c949ff4bd80f890110e/src/crazyKhoreia/lightPainting.py#L17) | Used in [calculate_stats](https://github.com/santiagorg2401/crazyKhoreia/blob/e36bff07f4cf89e3d0205c949ff4bd80f890110e/src/crazyKhoreia/lightPainting.py#L112) to estimate flight duration, assuming constant speed. **Side note:** It doesn't affect the waypoints dataset. | float
-|sleepTime | light painting | [lightPainting](https://github.com/santiagorg2401/crazyKhoreia/blob/e36bff07f4cf89e3d0205c949ff4bd80f890110e/src/crazyKhoreia/lightPainting.py#L17) | Used in [calculate_stats](https://github.com/santiagorg2401/crazyKhoreia/blob/e36bff07f4cf89e3d0205c949ff4bd80f890110e/src/crazyKhoreia/lightPainting.py#L112) to estimate flight duration, assuming that the UAV stops at each reached waypoint for **sleepTime** seconds. **Side note:** It doesn't affect the waypoints dataset. | float
+|sleepTime | light painting | [lightPainting](https://github.com/santiagorg2401/crazyKhoreia/blob/e36bff07f4cf89e3d0205c949ff4bd80f890110e/src/crazyKhoreia/lightPainting.py#L17) | Used in [calculate_stats](https://github.com/santiagorg2401/crazyKhoreia/blob/e36bff07f4cf89e3d0205c949ff4bd80f890110e/src/crazyKhoreia/lightPainting.py#L112) to estimate flight duration, assuming that the UAV stops at each reached waypoint for the flew time duration plus a **sleepTime** percentage from it. **Side note:** It doesn't affect the waypoints dataset. | float
 |video | light painting | [lightPainting](https://github.com/santiagorg2401/crazyKhoreia/blob/e36bff07f4cf89e3d0205c949ff4bd80f890110e/src/crazyKhoreia/lightPainting.py#L17) | Set video to ```True``` if you want to render an animation of the light painting generation, else set ```False```. | bool
 |out_path|light painting | [lightPainting](https://github.com/santiagorg2401/crazyKhoreia/blob/e36bff07f4cf89e3d0205c949ff4bd80f890110e/src/crazyKhoreia/lightPainting.py#L17) | Files output path. | str
 
@@ -54,7 +53,8 @@ Take into account that lightPainting class creates an instance of the crazyKhore
 
 To run the program, create an instance of the lightPainting class.
 ```console
-lp = lightPainting(MAX_WIDTH, MAX_HEIGHT, MIN_WIDTH, MIN_HEIGHT, in_path, out_path, detail=0.05, speed=1.0, sleepTime=0.1, video=False, led=False)
+from crazyKhoreia.lightPainting import lightPainting
+lp = lightPainting(MAX_WIDTH, MAX_HEIGHT, MIN_WIDTH, MIN_HEIGHT, in_path, out_path, detail=0.05, speed=1.0, sleepTime=1.5, video=False, led=False)
 ```
 
 After its execution you'll notice the output files within the set output path.
