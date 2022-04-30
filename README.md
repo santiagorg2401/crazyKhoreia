@@ -20,6 +20,7 @@ Before using crazyKhoreia, please install the following dependencies.
 $ pip3 install opencv-python
 $ pip3 install numpy
 $ pip3 install matplotlib
+$ pip3 install scipy
 ```
 
 ### Installing from Pypi with Python 3.
