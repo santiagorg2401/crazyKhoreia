@@ -36,8 +36,12 @@ class lightPainting():
             for i in range(1, initialPoints):
                 if ((i + 1 == len(wayPoints)) | (i == len(wayPoints))):
                     break
-                elif (np.linalg.norm(wayPoints[:, 0:3][i - 1] - wayPoints[:, 0:3][i]) < detail) & (wayPoints[:, 3][i] == 1):
-                    wayPoints = np.delete(wayPoints, i, 0)
+                elif self.led == True:
+                    if (np.linalg.norm(wayPoints[:, 0:3][i - 1] - wayPoints[:, 0:3][i]) < detail) & (wayPoints[:, 3][i] == 1):
+                        wayPoints = np.delete(wayPoints, i, 0)
+                elif self.led == False:
+                    if (np.linalg.norm(wayPoints[:, 0:3][i - 1] - wayPoints[:, 0:3][i]) < detail):
+                        wayPoints = np.delete(wayPoints, i, 0)
 
         return wayPoints
 

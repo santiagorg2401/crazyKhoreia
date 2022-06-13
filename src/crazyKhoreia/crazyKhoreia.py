@@ -33,9 +33,6 @@ class crazyKhoreia():
         # Flip image.
         img_flipped = cv.flip(self.img, 0)
 
-        # Invert the input image before detecting contours (see: https://stackoverflow.com/questions/29329866/how-to-avoid-detecting-image-frame-when-using-findcontours).
-        img_flipped = 255 - img_flipped
-
         # Convert the image from BGR to grayscale.
         im_gray = cv.cvtColor(img_flipped, cv.COLOR_BGR2GRAY)
 
@@ -45,6 +42,17 @@ class crazyKhoreia():
         # Find countours.
         contours, hierarchy = cv.findContours(
             image=img_bw, mode=cv.RETR_TREE, method=cv.CHAIN_APPROX_NONE)
+
+        # Find frame countour, if any, and delete it (see: https://stackoverflow.com/questions/29329866/how-to-avoid-detecting-image-frame-when-using-findcontours).
+        for contour in contours:
+            x, y, w, h = cv.boundingRect(contour)
+            cnt_size = w*h
+            ImgShape_Y, ImgShape_X = self.img.shape[:2]
+            img_size = ImgShape_Y*ImgShape_X
+            ERROR_THRESHOLD = 0.01
+            error = abs(cnt_size-img_size)
+            if(error <= ERROR_THRESHOLD):
+                contours.remove(contour)
 
         # Create subplots for original image and image with contours visualization.
         fig, (ax0, ax1, ax2) = plt.subplots(nrows=1, ncols=3)
@@ -61,7 +69,7 @@ class crazyKhoreia():
 
         # Draw contours on original image.
         img_with_contour = cv.drawContours(
-            image=255 - img_flipped, contours=contours, contourIdx=-1, color=(0, 255, 0), thickness=3, lineType=cv.LINE_AA)
+            image=img_flipped, contours=contours, contourIdx=-1, color=(0, 255, 0), thickness=3, lineType=cv.LINE_AA)
 
         ax2.imshow(cv.flip(img_with_contour[..., ::-1], 0))
 
