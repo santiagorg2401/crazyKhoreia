@@ -1,6 +1,13 @@
 # crazyKhoreia
 ## Brief description.
 crazyKhoreia is a robotic perception system intended for UAVs (aka drones), which takes a digital image and converts it into a waypoint matrix using X, Y and Z coordinates in meters for UAVs choreography design.
+
+A preprint paper of this project is available [here](https://www.techrxiv.org/articles/preprint/CrazyKhoreia_a_robotic_perception_system_for_UAV_path_planning_from_digital_images/21836868/1).
+
+If this work is useful to you, please cite us:
+```
+@article{Restrepo2023, author = "Santiago Restrepo and Victor Romero Cano", title = "{CrazyKhoreia, a robotic perception system for UAV path planning from digital images}", year = "2023", month = "1", url = "https://www.techrxiv.org/articles/preprint/CrazyKhoreia_a_robotic_perception_system_for_UAV_path_planning_from_digital_images/21836868", doi = "10.36227/techrxiv.21836868.v1" } 
+```
 ## How does it work?
 crazyKhoreia takes a digital image and uses a vectorizing technic based on openCV [findContours](https://docs.opencv.org/3.4/d3/dc0/group__imgproc__shape.html#ga17ed9f5d79ae97bd4c7cf18403e1689a) algorithm to obtain contours, then, it gets waypoints from those contours, after that, depending on the usage mode (either lightPainting or multi-UAV formation), it optimizes the waypoints and finds a feasible 2D path for travelling through **all** of them, or it computes safe trajectories for multi-UAV formation.
 
