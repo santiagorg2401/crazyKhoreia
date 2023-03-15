@@ -2,8 +2,8 @@
 
 import cv2 as cv
 import numpy as np
-from matplotlib import pyplot as plt
 from cycler import cycler
+from matplotlib import pyplot as plt
 
 
 class crazyKhoreia():
@@ -42,6 +42,7 @@ class crazyKhoreia():
         # Find countours.
         contours, hierarchy = cv.findContours(
             image=img_bw, mode=cv.RETR_TREE, method=cv.CHAIN_APPROX_NONE)
+        contours = list(contours)
 
         # Find frame countour, if any, and delete it (see: https://stackoverflow.com/questions/29329866/how-to-avoid-detecting-image-frame-when-using-findcontours).
         for contour in contours:
