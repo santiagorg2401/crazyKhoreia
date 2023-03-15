@@ -10,23 +10,21 @@ import numpy as np
 from crazyKhoreia.crazyKhoreia import crazyKhoreia
 
 
-class lightPainting():
+class lightPainting(crazyKhoreia):
     def __init__(self, MAX_WIDTH, MAX_HEIGHT, MIN_WIDTH, MIN_HEIGHT, in_path, out_path, detail=0.05, speed=1.0, sleepTime=1.5, video=False, led=False):
+        super().__init__(MAX_WIDTH, MAX_HEIGHT, MIN_WIDTH, MIN_HEIGHT, in_path, led)
 
         self.MAX_WIDTH, self.MAX_HEIGHT, self.MIN_WIDTH, self.MIN_HEIGHT, self.in_path, self.out_path = MAX_WIDTH, MAX_HEIGHT, MIN_WIDTH, MIN_HEIGHT, in_path, out_path
         self.detail, self.speed, self.sleepTime, self.video, self.led = detail, speed, sleepTime, video, led
 
-        self.ck = crazyKhoreia(self.MAX_WIDTH, self.MAX_HEIGHT,
-                               self.MIN_WIDTH, self.MIN_HEIGHT, self.in_path, self.led)
-
-        self.wayPoints = self.ck.get_waypoints()
+        self.wayPoints = self.get_waypoints()
         self.wayPoints = self.clean_waypoints(self.wayPoints, self.detail)
 
         self.distance, self.Time = self.calculate_stats()
         self.msg = self.save(self.wayPoints, self.distance,
                              self.Time, self.in_path, self.out_path, self.video)
 
-        self.ck.plot_contour_inspection(self.wayPoints)
+        self.plot_contour_inspection(self.wayPoints)
 
         plt.show()
 

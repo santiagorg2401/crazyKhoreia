@@ -12,16 +12,15 @@ from crazyKhoreia._3DIoU import _3DIoU
 from crazyKhoreia.crazyKhoreia import crazyKhoreia
 
 
-class multiDroneFormation():
+class multiDroneFormation(crazyKhoreia):
     def __init__(self, MAX_WIDTH, MAX_HEIGHT, MIN_WIDTH, MIN_HEIGHT, MIN_DEPTH, MAX_DEPTH, boxShape, in_path, out_path, nmbr_drones):
+        super().__init__(MAX_WIDTH, MAX_HEIGHT, MIN_WIDTH, MIN_HEIGHT, in_path)
+
         self.MAX_WIDTH, self.MAX_HEIGHT, self.MIN_WIDTH, self.MIN_HEIGHT, self.MIN_DEPTH, self.MAX_DEPTH, self.boxShape, self.in_path, self.out_path = MAX_WIDTH, MAX_HEIGHT, MIN_WIDTH, MIN_HEIGHT, MIN_DEPTH, MAX_DEPTH, boxShape, in_path, out_path
         self.nmbr_drones = nmbr_drones
 
-        self.ck = crazyKhoreia(self.MAX_WIDTH, self.MAX_HEIGHT,
-                               self.MIN_WIDTH, self.MIN_HEIGHT, self.in_path)
-
-        self.wayPoints = self.ck.get_waypoints()
-        self.ck.plot_contour_inspection(self.wayPoints)
+        self.wayPoints = self.get_waypoints()
+        self.plot_contour_inspection(self.wayPoints)
 
         cc = self.get_clusters()
         positions = self.get_idealPositions(cc)
