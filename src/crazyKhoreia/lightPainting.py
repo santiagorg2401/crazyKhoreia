@@ -11,39 +11,64 @@ from crazyKhoreia.crazyKhoreia import crazyKhoreia
 
 
 class lightPainting(crazyKhoreia):
-    def __init__(self, MAX_WIDTH, MAX_HEIGHT, MIN_WIDTH, MIN_HEIGHT, in_path, out_path, detail=0.05, speed=1.0, sleepTime=1.5, video=False, led=False):
-        super().__init__(MAX_WIDTH, MAX_HEIGHT, MIN_WIDTH, MIN_HEIGHT, in_path, led)
+    """
+    CrazyKhoreia's child class LightPainting performs waypoint processing from CrazyKhoreia's image-based waypoint generation.
+    Attributes:
+        dims        (array):    2x3 float array containing flight space constraints in the x, y, and z axis [[MIN_X, MIN_Y, MIN_Z],[MAX_X, MAX_Y, MAX_Z]]
+        in_path     (str):      Global image's path to process.
+        out_path    (str):      File output path.
+        detail      (float):    Waypoint resolution.
+        speed       (float):    UAV speed.
+        sleepTime   (float):    Percentage to estimate flight duration if the UAV stops at each waypoint. TODO: Is this really necessary?
+        video       (bool):     Set to export a video animation of the UAV.
+        led         (bool):     Whether or not to control LED light relative to out of contour travel. TODO: Is this really necessary?
+        
+        cnt_scaled  (list):     List of processed contours.
+        wpts        (list):     List of k x 3 waypoints matrix plus additional columns.
+        distance    (float):    Total flight distance.
+        Time        (float):    Total flight time.
 
-        self.MAX_WIDTH, self.MAX_HEIGHT, self.MIN_WIDTH, self.MIN_HEIGHT, self.in_path, self.out_path = MAX_WIDTH, MAX_HEIGHT, MIN_WIDTH, MIN_HEIGHT, in_path, out_path
+    Methods:
+        clean_waypoints():
+            Removes waypoints that are at a certain distance from each other according to a detail parameter.
+        update(numb, x, y, line):
+            Helper function to animate the video.
+        calculate_stats():
+            Calculate flight metrics such as total distance and time.
+        save():
+            If set computes animation, saves files to set location and prints summary.
+    """
+
+    def __init__(self, dims, in_path, out_path, detail=0.05, speed=1.0, sleepTime=1.5, video=False, led=False):
+        super().__init__(dims, in_path, led)
+
+        self.dims, self.in_path, self.out_path = dims, in_path, out_path
         self.detail, self.speed, self.sleepTime, self.video, self.led = detail, speed, sleepTime, video, led
 
-        self.wayPoints = self.get_waypoints()
-        self.wayPoints = self.clean_waypoints(self.wayPoints, self.detail)
+        self.wpts = self.get_waypoints()
+        self.clean_waypoints()
 
         self.distance, self.Time = self.calculate_stats()
-        self.msg = self.save(self.wayPoints, self.distance,
-                             self.Time, self.in_path, self.out_path, self.video)
+        self.save()
 
-        self.plot_contour_inspection(self.wayPoints)
+        self.plot_contour_inspection(self.wpts)
 
         plt.show()
 
-    def clean_waypoints(self, wayPoints, detail):
+    def clean_waypoints(self):
         # Clean wayPoints by a detail parameter.
-        initialPoints = len(wayPoints)
+        initialPoints = len(self.wpts)
 
         for j in range(0, 10):
             for i in range(1, initialPoints):
-                if ((i + 1 == len(wayPoints)) | (i == len(wayPoints))):
+                if ((i + 1 == len(self.wpts)) | (i == len(self.wpts))):
                     break
                 elif self.led == True:
-                    if (np.linalg.norm(wayPoints[:, 0:3][i - 1] - wayPoints[:, 0:3][i]) < detail) & (wayPoints[:, 3][i] == 1):
-                        wayPoints = np.delete(wayPoints, i, 0)
+                    if (np.linalg.norm(self.wpts[:, 0:3][i - 1] - self.wpts[:, 0:3][i]) < self.detail) & (self.wpts[:, 3][i] == 1):
+                        self.wpts = np.delete(self.wpts, i, 0)
                 elif self.led == False:
-                    if (np.linalg.norm(wayPoints[:, 0:3][i - 1] - wayPoints[:, 0:3][i]) < detail):
-                        wayPoints = np.delete(wayPoints, i, 0)
-
-        return wayPoints
+                    if (np.linalg.norm(self.wpts[:, 0:3][i - 1] - self.wpts[:, 0:3][i]) < self.detail):
+                        self.wpts = np.delete(self.wpts, i, 0)
 
     def update(self, num, x, y, line):
         line.set_data(x[:num], y[:num])
@@ -51,33 +76,33 @@ class lightPainting(crazyKhoreia):
 
     def calculate_stats(self):
         distance = 0
-        takeOffHeight = self.wayPoints[0][2]
+        takeOffHeight = self.wpts[0][2]
         initialPos = np.array(
-            self.wayPoints[:, 0:3][0] - np.array([0, 0, takeOffHeight]))
+            self.wpts[:, 0:3][0] - np.array([0, 0, takeOffHeight]))
 
-        for i in range(0, len(self.wayPoints)):
+        for i in range(0, len(self.wpts)):
             if i == 0:
                 distance += abs(np.linalg.norm(initialPos -
-                                self.wayPoints[:, 0:3][0]))
+                                self.wpts[:, 0:3][0]))
             else:
                 distance += abs(np.linalg.norm(
-                    self.wayPoints[:, 0:3][i - 1] - self.wayPoints[:, 0:3][i]))
+                    self.wpts[:, 0:3][i - 1] - self.wpts[:, 0:3][i]))
 
         Time = distance/self.speed*self.sleepTime
 
         return distance, Time
 
-    def save(self, wayPoints, distance, Time, in_path, out_path, video):
-        file_name = os.path.basename(in_path)
+    def save(self):
+        file_name = os.path.basename(self.in_path)
         name = file_name.split('.', 1)[0]
 
-        X = wayPoints[:, 0]
-        Y = wayPoints[:, 1]
-        Z = wayPoints[:, 2]
+        X = self.wpts[:, 0]
+        Y = self.wpts[:, 1]
+        Z = self.wpts[:, 2]
 
         # Plot points.
         fig2, ax1 = plt.subplots()
-        ax1.plot(wayPoints[:, 1], wayPoints[:, 2], 'o',
+        ax1.plot(self.wpts[:, 1], self.wpts[:, 2], 'o',
                  c='blueviolet', label="waypoints.")
         ax1.plot(Y, Z, color='#570861')
         ax1.set_title("UAV path.")
@@ -86,30 +111,29 @@ class lightPainting(crazyKhoreia):
         line, = ax.plot(Y, Z, color='#570861')
         ax.set_title("UAV path animation.")
 
-        if video == True:
+        if self.video == True:
             ani = animation.FuncAnimation(fig, self.update, len(Y), fargs=[Y, Z, line],
                                           interval=50, blit=True)
-            ani.save(out_path + name + '_lp_video.mp4')
+            ani.save(self.out_path + name + '_lp_video.mp4')
             plt.show()
 
-        np.savetxt(out_path + name +
-                   '_lp_wpts.csv', wayPoints, delimiter=",")
+        np.savetxt(self.out_path + name +
+                   '_lp_wpts.csv', self.wpts, delimiter=",")
 
         minCoords = np.array([min(X), min(Y), min(Z)])
         maxCoords = np.array([max(X), max(Y), max(Z)])
-        takeOffHeight = wayPoints[0][2]
+        takeOffHeight = self.wpts[0][2]
 
-        initialPos = wayPoints[:, 0:3][0] - np.array([0, 0, takeOffHeight])
+        initialPos = self.wpts[:, 0:3][0] - \
+            np.array([0, 0, takeOffHeight])
 
         msg = "Choreography ready!, please read the following information:" + \
               "\nInitial position: " + str(initialPos) + \
               "\nTake off heigth: " + str(takeOffHeight) + \
               "\nMinimum coordinates: " + str(minCoords) + \
               "\nMaximum coordinates: " + str(maxCoords) + \
-              "\nNumber of waypoints: " + str(len(wayPoints)) + \
-              "\nTotal distance: " + str(distance) + " meters." + \
-              "\nTotal time: " + str(datetime.timedelta(seconds=Time))
+              "\nNumber of waypoints: " + str(len(self.wpts)) + \
+              "\nTotal distance: " + str(self.distance) + " meters." + \
+              "\nTotal time: " + str(datetime.timedelta(seconds=self.Time))
 
         print(msg)
-
-        return msg

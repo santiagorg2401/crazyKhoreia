@@ -7,8 +7,28 @@ from matplotlib import pyplot as plt
 
 
 class crazyKhoreia():
-    def __init__(self, MAX_WIDTH, MAX_HEIGHT, MIN_WIDTH, MIN_HEIGHT, in_path, led=False):
-        self.MAX_WIDTH, self.MAX_HEIGHT, self.MIN_WIDTH, self.MIN_HEIGHT, self.in_path, self.led = MAX_WIDTH, MAX_HEIGHT, MIN_WIDTH, MIN_HEIGHT, in_path, led
+    """
+    CrazyKhoreia class performs image-based waypoint generation.
+    Attributes:
+        dims        (array):    2x3 float array containing flight space constraints in the x, y, and z axis [[MIN_X, MIN_Y, MIN_Z],[MAX_X, MAX_Y, MAX_Z]]
+        in_path     (str):      Global image's path to process.
+        led         (bool):     Whether or not to control LED light relative to out of contour travel. TODO: Is this really necessary?
+        
+        cnt_scaled  (list):     List of processed contours.
+
+    Methods:
+        process_image():
+            Processes image, generate and return a contour list.
+        process_contours(contours):
+            Processes contours and returns a new list of processed contours.
+        get_waypoints():
+            Extracts waypoints from processed contours, if set, add a LED control column.
+        plot_contour_inspection(waypoints):
+            Plot a figure containing al contours and waypoints with their start/end points.
+    """
+
+    def __init__(self, dims, in_path, led=False):
+        self.dims, self.in_path, self.led = dims, in_path, led
 
         # Read image.
         self.img = cv.imread(self.in_path, cv.IMREAD_UNCHANGED)
@@ -17,8 +37,7 @@ class crazyKhoreia():
         contours = self.process_image()
 
         # Proccess the contours and get its parameters relative to the input image.
-        self.cnt_scaled, self.ImgShape_X, self.ImgShape_Y = self.process_contours(
-            contours)
+        self.cnt_scaled = self.process_contours(contours)
 
     def process_image(self):
         # If the image type is png, it'll have a fourth channel known as alpha, which is transparency,
@@ -81,8 +100,8 @@ class crazyKhoreia():
         ImgShape_Y, ImgShape_X = self.img.shape[:2]
 
         # Get image's scale factor from its dimensions and user's parameters.
-        scale_fact_x = ImgShape_X/(self.MAX_WIDTH - self.MIN_WIDTH)
-        scale_fact_y = ImgShape_Y/(self.MAX_HEIGHT - self.MIN_HEIGHT)
+        scale_fact_x = ImgShape_X/(self.dims[1][1] - self.dims[0][1])
+        scale_fact_y = ImgShape_Y/(self.dims[1][2] - self.dims[0][2])
 
         # Scale contours if needed to satisfy maximum dimensions requirements.
         cnt_scaled = []
@@ -94,14 +113,6 @@ class crazyKhoreia():
                     cnt_scaled.append(cnt*(1.0/scale_fact_x))
                 else:
                     cnt_scaled.append(cnt*(1.0/scale_fact_y))
-
-        # Adjust image parameters relative to its scaled contours.
-        if(scale_fact_x > scale_fact_y):
-            ImgShape_X /= scale_fact_x
-            ImgShape_Y /= scale_fact_x
-        if(scale_fact_y > scale_fact_x):
-            ImgShape_X /= scale_fact_y
-            ImgShape_Y /= scale_fact_y
 
        # Translate the scaled contours to satisfy minimum dimensions requirements.
         minX = []
@@ -118,12 +129,12 @@ class crazyKhoreia():
 
         cnt_scaled_x = []
         for cnt in cnt_scaled:
-            cnt_x = cnt + [minX, minY] + [self.MIN_WIDTH, self.MIN_HEIGHT]
+            cnt_x = cnt + [minX, minY] + [self.dims[0][1], self.dims[0][2]]
             cnt_scaled_x.append(cnt_x)
 
         cnt_scaled = cnt_scaled_x
 
-        return cnt_scaled, ImgShape_X, ImgShape_Y
+        return cnt_scaled
 
     def plot_contour_inspection(self, wayPoints):
         strPoints = np.empty((0, 2))

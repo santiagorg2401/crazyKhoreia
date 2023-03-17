@@ -37,7 +37,7 @@ To install crazyKhoreia you'll need Python 3 and pip:
 pip3 install crazyKhoreia
 ```
 ### Installing from source.
-If you'd like to develop, edit or have full access into the crazyKhoreia system them you may install it from source.
+If you'd like to develop, edit or have full access into the crazyKhoreia system, then you may install it from source.
 ```console
 git clone https://github.com/santiagorg2401/crazyKhoreia.git
 ```
@@ -46,10 +46,7 @@ crazyKhoreia's usage it's pretty straightforward, you'll only need a digital ima
 
 | Parameter | Usage mode | Class | Description | Data type |
 | --- | --- | --- | --- | --- |
-| MAX_WIDTH | all | [lightPainting](https://github.com/santiagorg2401/crazyKhoreia/blob/master/src/crazyKhoreia/lightPainting.py) [multiDroneFormation](https://github.com/santiagorg2401/crazyKhoreia/blob/master/src/crazyKhoreia/multiDroneFormation.py) | Maximum workspace width. | float
-| MAX_HEIGHT | all | [lightPainting](https://github.com/santiagorg2401/crazyKhoreia/blob/master/src/crazyKhoreia/lightPainting.py) [multiDroneFormation](https://github.com/santiagorg2401/crazyKhoreia/blob/master/src/crazyKhoreia/multiDroneFormation.py) | Maximum workspace height. | float
-| MIN_WIDTH | all | [lightPainting](https://github.com/santiagorg2401/crazyKhoreia/blob/master/src/crazyKhoreia/lightPainting.py) [multiDroneFormation](https://github.com/santiagorg2401/crazyKhoreia/blob/master/src/crazyKhoreia/multiDroneFormation.py) | Minimum workspace width. | float
-| MIN_HEIGHT | all | [lightPainting](https://github.com/santiagorg2401/crazyKhoreia/blob/master/src/crazyKhoreia/lightPainting.py) [multiDroneFormation](https://github.com/santiagorg2401/crazyKhoreia/blob/master/src/crazyKhoreia/multiDroneFormation.py) | Minimum workspace height. | float
+| dims | all | [lightPainting](https://github.com/santiagorg2401/crazyKhoreia/blob/master/src/crazyKhoreia/lightPainting.py) [multiDroneFormation](https://github.com/santiagorg2401/crazyKhoreia/blob/master/src/crazyKhoreia/multiDroneFormation.py) | 2x3 float array containing flight space constraints in the x, y, and z axis [[MIN_X, MIN_Y, MIN_Z],[MAX_X, MAX_Y, MAX_Z]] | array
 | in_path | all | [lightPainting](https://github.com/santiagorg2401/crazyKhoreia/blob/master/src/crazyKhoreia/lightPainting.py) [multiDroneFormation](https://github.com/santiagorg2401/crazyKhoreia/blob/master/src/crazyKhoreia/multiDroneFormation.py)| Image file path. | str
 |out_path| all| [lightPainting](https://github.com/santiagorg2401/crazyKhoreia/blob/master/src/crazyKhoreia/lightPainting.py) [multiDroneFormation](https://github.com/santiagorg2401/crazyKhoreia/blob/master/src/crazyKhoreia/multiDroneFormation.py)| Files output path. | str
 | led | light painting | [lightPainting](https://github.com/santiagorg2401/crazyKhoreia/blob/master/src/crazyKhoreia/lightPainting.py) | Set led to ```True``` if you want to add led control within the waypoints output file, else, set ```False```. | bool
@@ -57,8 +54,6 @@ crazyKhoreia's usage it's pretty straightforward, you'll only need a digital ima
 | speed | light painting | [lightPainting](https://github.com/santiagorg2401/crazyKhoreia/blob/master/src/crazyKhoreia/lightPainting.py) | Used in [calculate_stats](https://github.com/santiagorg2401/crazyKhoreia/blob/9bada2480789167e003016494ea361c302cc203b/src/crazyKhoreia/lightPainting.py#L48) to estimate flight duration, assuming constant speed. **Side note:** It doesn't affect the waypoints dataset. | float
 |sleepTime | light painting | [lightPainting](https://github.com/santiagorg2401/crazyKhoreia/blob/master/src/crazyKhoreia/lightPainting.py) | Used in [calculate_stats](https://github.com/santiagorg2401/crazyKhoreia/blob/9bada2480789167e003016494ea361c302cc203b/src/crazyKhoreia/lightPainting.py#L48) to estimate flight duration, assuming that the UAV stops at each reached waypoint for the flew time duration plus a **sleepTime** percentage from it. **Side note:** It doesn't affect the waypoints dataset. | float
 |video | light painting | [lightPainting](https://github.com/santiagorg2401/crazyKhoreia/blob/master/src/crazyKhoreia/lightPainting.py) | Set video to ```True``` if you want to render an animation of the light painting generation, else set ```False```. | bool
-| MAX_DEPTH | multiDroneFormation | [multiDroneFormation](https://github.com/santiagorg2401/crazyKhoreia/blob/master/src/crazyKhoreia/multiDroneFormation.py) | Maximum workspace depth. | float
-| MIN_DEPTH | multiDroneFormation | [multiDroneFormation](https://github.com/santiagorg2401/crazyKhoreia/blob/master/src/crazyKhoreia/multiDroneFormation.py) | Minimum workspace depth. | float
 | boxShape | multiDroneFormation | [multiDroneFormation](https://github.com/santiagorg2401/crazyKhoreia/blob/master/src/crazyKhoreia/multiDroneFormation.py) | Refers to the bounding box for each UAV, contains an 1x3 array, containing the box's: (length (X axis), wide (Y axis), height (Z axis)) in meters. | array
 
 Take into account that lightPainting and multiDroneFormation classes creates an instance of the crazyKhoreia class in its constructor method.
@@ -67,14 +62,14 @@ To run the program, create an instance of the lightPainting class.
 ```console
 from crazyKhoreia.lightPainting import lightPainting
 
-lp = lightPainting(MAX_WIDTH, MAX_HEIGHT, MIN_WIDTH, MIN_HEIGHT, in_path, out_path, detail=0.05, speed=1.0, sleepTime=1.5, video=False, led=False)
+lp = lightPainting(dims, in_path, out_path, detail=0.05, speed=1.0, sleepTime=1.5, video=False, led=False)
 ```
 
 Or if you want to execute multiDroneFormation.
 ```console
 from crazyKhoreia.multiDroneFormation import multiDroneFormation
 
-mdf = multiDroneFormation(MAX_WIDTH, MAX_HEIGHT, MIN_WIDTH, MIN_HEIGHT, MIN_DEPTH, MAX_DEPTH, boxShape, in_path, out_path, nmbr_drones)
+mdf = multiDroneFormation(dims, boxShape, in_path, out_path, nmbr_drones)
 ```
 After its execution you'll notice the output files within the set output path.
 
