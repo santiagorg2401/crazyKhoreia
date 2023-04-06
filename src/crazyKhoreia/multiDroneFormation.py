@@ -55,6 +55,7 @@ class multiDroneFormation(crazyKhoreia):
         cc = self.get_clusters(wayPoints)
         self.idealPositions = self.get_idealPositions(cc)
         self.adjustedPositions = self.getIoUsppd()
+        self.centerPositions()
         self.droneAssignments = self.dronePositionAssignment()
 
         self.visualize()
@@ -65,7 +66,7 @@ class multiDroneFormation(crazyKhoreia):
     def get_clusters(self, wayPoints):
         fig, ax0 = plt.subplots()
         kmeans = KMeans(
-            n_init='auto', n_clusters=self.num_drones, random_state=0)
+            n_init=10, n_clusters=self.num_drones, random_state=0)
         y_pred = kmeans.fit_predict(
             np.array([wayPoints[:, 1], wayPoints[:, 2]]).T)
         cc = kmeans.cluster_centers_
@@ -135,6 +136,14 @@ class multiDroneFormation(crazyKhoreia):
 
         return adjustedPositions
 
+    def centerPositions(self):
+        centerFS = np.mean(self.dims[:, :2], axis=0)
+        maxX = np.max(self.adjustedPositions[:, 0])
+        minX = np.min(self.adjustedPositions[:, 0])
+        centerSwarm = (maxX - minX)/2.0 + minX
+        diff = centerFS - centerSwarm
+        self.adjustedPositions[:, 0] += diff[0]
+
     def estimateInitialGrid(self):
         center = np.mean(self.dims[:, :2], axis=0)
         grid_dim = int(np.ceil(np.sqrt(self.num_drones)))
@@ -167,10 +176,6 @@ class multiDroneFormation(crazyKhoreia):
             year = {2022},
         }
         """
-
-        # Compute the pairwise Euclidean distances between waypoints
-        distances = np.array(
-            cdist(self.adjustedPositions, self.adjustedPositions))
 
         # Compute the pairwise cost matrix between waypoint and drone.
         cost = np.array(cdist(self.initialGrid, self.adjustedPositions))
@@ -249,6 +254,15 @@ class multiDroneFormation(crazyKhoreia):
                 [self.dims[0][2], self.dims[1][2]], linestyle='dashed', label='Flight space dimensions.', color='black')
         ax.axis('equal')
 
+        # Plot lines between UAVs from initial grid and their assigned waypoints.
+        ax.plot([self.initialGrid[0][0], self.droneAssignments[0][0]],
+                [self.initialGrid[0][1], self.droneAssignments[0][1]],
+                [self.initialGrid[0][2], self.droneAssignments[0][2]], linestyle='dashdot', color="gray", label="Flight path.")
+        for i in range(1, self.num_drones):
+            ax.plot([self.initialGrid[i][0], self.droneAssignments[i][0]],
+                    [self.initialGrid[i][1], self.droneAssignments[i][1]],
+                    [self.initialGrid[i][2], self.droneAssignments[i][2]], linestyle='dashdot', color="gray")
+
         ax.legend()
 
     def save(self):
@@ -259,4 +273,4 @@ class multiDroneFormation(crazyKhoreia):
                    '_mdf_initial_grid.csv', self.initialGrid, delimiter=",")
 
         np.savetxt(self.out_path + name +
-                   '_mdf_wpts.csv', self.initialGrid, delimiter=",")
+                   '_mdf_wpts.csv', self.droneAssignments, delimiter=",")
